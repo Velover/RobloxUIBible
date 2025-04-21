@@ -1,5 +1,10 @@
 import { useMemo } from "react";
 import { useScreenSize } from "./useScreenSize";
+
+export const DESKTOP_SCALING_FACTOR = 1.0;
+export const TABLET_SCALING_FACTOR = 1.40625;
+export const MOBILE_SCALING_FACTOR = 2.7480916;
+
 /**
  * Device layout types including orientation variants
  */
@@ -37,7 +42,7 @@ const DEVICE_THRESHOLDS = {
 		MIN_HEIGHT: 180,
 	},
 	TABLET: {
-		MIN_WIDTH: 768, // Updated to match logic in DetectDeviceLayout
+		MIN_WIDTH: 768,
 		MAX_WIDTH: 1365,
 		MIN_HEIGHT: 768,
 	},
@@ -335,3 +340,57 @@ export const useDevicePortraitLayout = (white_listed_layouts?: EDeviceLayout[]):
 		return FindClosestLayout(detected_layout, white_listed_layouts);
 	}, [screen_size, ...(white_listed_layouts ?? [])]);
 };
+
+/** Hook that returns a value based on the current device landscape layout
+ * @param whitelist Optional list of allowed layouts. If provided, returns the closest match.
+ * @returns A function that takes a default value and an options object, returning the value corresponding to the current layout or the default value if not found.
+ */
+export function useSwitchLandscapeLayout<T>(whitelist?: EDeviceLayout[]): <T>(
+	default_value: T,
+	options: {
+		[key in EDeviceLayout]?: T;
+	},
+) => T {
+	const layout = useDeviceLandscapeLayout(whitelist);
+
+	return (default_value, options) => {
+		return options[layout] ?? default_value;
+	};
+}
+
+/**
+ * Hook that returns a value based on the current device portrait layout
+ * @param whitelist Optional list of allowed layouts. If provided, returns the closest match.
+ * @returns A function that takes a default value and an options object, returning the value corresponding to the current layout or the default value if not found.
+ */
+
+export function useSwitchPortraitLayout(whitelist?: EDeviceLayout[]): <T>(
+	default_value: T,
+	options: {
+		[key in EDeviceLayout]?: T;
+	},
+) => T {
+	const layout = useDevicePortraitLayout(whitelist);
+
+	return (default_value, options) => {
+		return options[layout] ?? default_value;
+	};
+}
+
+/**
+ * Hook that returns a value based on the current device layout
+ * @param whitelist Optional list of allowed layouts. If provided, returns the closest match.
+ * @returns A function that takes a default value and an options object, returning the value corresponding to the current layout or the default value if not found.
+ */
+export function useSwitchLayout(whitelist?: EDeviceLayout[]): <T>(
+	default_value: T,
+	options: {
+		[key in EDeviceLayout]?: T;
+	},
+) => T {
+	const layout = useDeviceLayout(whitelist);
+
+	return (default_value, options) => {
+		return options[layout] ?? default_value;
+	};
+}
